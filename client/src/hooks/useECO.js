@@ -88,9 +88,9 @@ export default function useECO() {
     }
   };
 
-  const handleReject = async (id, lastKnownUpdatedAt) => {
+  const handleReject = async (id, reason = '', lastKnownUpdatedAt) => {
     try {
-      const eco = await rejectEco(id, lastKnownUpdatedAt);
+      const eco = await rejectEco(id, reason, lastKnownUpdatedAt);
       toast.success('ECO rejected');
       if (selectedEco?.id === id) await loadEcoDetail(id);
       return eco;

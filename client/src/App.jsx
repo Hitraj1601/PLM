@@ -6,6 +6,7 @@ import SignupPage from './pages/SignupPage';
 import Toast from './components/ui/Toast';
 import useAuthStore from './store/authStore';
 
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const BOMPage = lazy(() => import('./pages/BOMPage'));
@@ -15,35 +16,30 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 // Custom component to protect routes that require authentication
 function ProtectedRoute({ children }) {
-  // Get the authentication status from the global auth store
   const { isAuthenticated } = useAuthStore();
   
-  // If the user is not authenticated, redirect them to the login page
-  // 'replace' ensures that this redirect doesn't add a new entry to the browser history
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  // If the user is not authenticated, redirect them to the landing page
+  if (!isAuthenticated) return <Navigate to="/landing" replace />;
   
-  // If authenticated, render the children components (i.e., the protected routes)
   return children;
 }
 
 export default function App() {
   return (
-    // Wrap the entire application in BrowserRouter to enable client-side routing
     <BrowserRouter>
-      {/* Toast component for displaying non-blocking notifications to the user */}
       <Toast />
       
-      {/* Define the main routing switch that decides which component to render based on URL */}
       <Suspense fallback={
-        <div className="flex items-center justify-center h-screen bg-navy-900">
+        <div className="flex items-center justify-center h-screen bg-navy-950">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-sienna-500 border-t-navy-900 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-sienna-500 border-t-navy-950 rounded-full animate-spin" />
             <span className="text-gainsboro-400 text-sm">Loading...</span>
           </div>
         </div>
       }>
         <Routes>
-          {/* Public routes: any user can access the login and signup pages */}
+          {/* Public Landing & Auth routes */}
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           

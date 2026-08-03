@@ -110,8 +110,8 @@ const useEcoStore = create((set, get) => ({
     }
   },
 
-  rejectEco: async (id, lastKnownUpdatedAt) => {
-    const { data } = await api.post(`/eco/${id}/reject`, { lastKnownUpdatedAt });
+  rejectEco: async (id, reason = '', lastKnownUpdatedAt) => {
+    const { data } = await api.post(`/eco/${id}/reject`, { reason, lastKnownUpdatedAt });
     set((state) => ({
       ecos: state.ecos.map((e) => (e.id === id ? { ...e, ...data } : e)),
     }));

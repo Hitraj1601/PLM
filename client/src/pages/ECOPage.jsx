@@ -67,6 +67,8 @@ export default function ECOPage() {
     ecos: ecos.filter((e) => e.stage_name === stage.name || (e.stage_id === stage.id)),
   }));
 
+  const [dragOverStageId, setDragOverStageId] = useState(null);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -148,40 +150,52 @@ export default function ECOPage() {
       ) : (
         /* Kanban Board */
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${stagesSorted.length}, minmax(250px, 1fr))` }}>
-          {kanbanColumns.map((col) => (
-            <div 
-              key={col.id} 
-              className="bg-navy-900/50 rounded-xl p-3 border border-navy-600/50"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const ecoId = e.dataTransfer.getData('ecoId');
-                if (ecoId) handleKanbanDrop(ecoId, col.id);
-              }}
-            >
-              <div className="flex items-center justify-between mb-3 px-1">
-                <div className="flex items-center gap-2">
-                  <Badge status={col.name} />
-                  <span className="text-xs text-gainsboro-500">{col.ecos.length}</span>
+          {kanbanColumns.map((col) => {
+            const isTarget = dragOverStageId === col.id;
+            return (
+              <div 
+                key={col.id} 
+                className={`rounded-xl p-3 border transition-all duration-200 ${
+                  isTarget 
+                    ? 'bg-sienna-500/10 border-sienna-500 shadow-xl shadow-sienna-500/10 scale-[1.01]' 
+                    : 'bg-navy-900/50 border-navy-600/50'
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (dragOverStageId !== col.id) setDragOverStageId(col.id);
+                }}
+                onDragLeave={() => setDragOverStageId(null)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverStageId(null);
+                  const ecoId = e.dataTransfer.getData('ecoId');
+                  if (ecoId) handleKanbanDrop(ecoId, col.id);
+                }}
+              >
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <Badge status={col.name} />
+                    <span className="text-xs text-gainsboro-500 font-semibold">{col.ecos.length}</span>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {col.ecos.map((eco) => (
+                    <div 
+                      key={eco.id}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('ecoId', eco.id);
+                      }}
+                      className="cursor-move hover:scale-[1.02] transition-transform"
+                    >
+                      <ECOCard eco={eco} onClick={() => loadEcoDetail(eco.id)} />
+                    </div>
+                  ))}
+                  {col.ecos.length === 0 && <p className="text-xs text-gainsboro-600 text-center py-4">No ECOs</p>}
                 </div>
               </div>
-              <div className="space-y-3">
-                {col.ecos.map((eco) => (
-                  <div 
-                    key={eco.id}
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData('ecoId', eco.id);
-                    }}
-                    className="cursor-move"
-                  >
-                    <ECOCard eco={eco} onClick={() => loadEcoDetail(eco.id)} />
-                  </div>
-                ))}
-                {col.ecos.length === 0 && <p className="text-xs text-gainsboro-600 text-center py-4">No ECOs</p>}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

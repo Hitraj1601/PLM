@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Layers, ChevronDown, ChevronUp, X, Search, Filter } from 'lucide-react';
+import { Plus, Layers, ChevronDown, ChevronUp, X, Search, Filter, Download } from 'lucide-react';
 import useBOM from '../hooks/useBOM';
 import useEcoStore from '../store/ecoStore';
 import useAuthStore from '../store/authStore';
@@ -8,6 +8,8 @@ import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import EmptyState from '../components/ui/EmptyState';
 import Pagination from '../components/ui/Pagination';
+import BOMTree from '../components/bom/BOMTree';
+import { exportToCSV } from '../utils/exportCsv';
 
 export default function BOMPage() {
   const { boms, bomsMeta, page, setPage, search, setSearch, filters, setFilters, handleCreate } = useBOM();
@@ -24,6 +26,18 @@ export default function BOMPage() {
 
   const canEdit = user?.role === 'engineering' || user?.role === 'admin';
   const activeProducts = (products || []).filter((p) => p.status === 'active');
+
+  const handleExportCSV = () => {
+    const exportData = boms.map(b => ({
+      Product: b.product_name || 'Unknown',
+      Version: b.version,
+      Status: b.status,
+      Components_Count: Array.isArray(b.components) ? b.components.length : (b.components ? JSON.parse(b.components).length : 0),
+      Operations_Count: Array.isArray(b.operations) ? b.operations.length : (b.operations ? JSON.parse(b.operations).length : 0),
+      Created_At: new Date(b.created_at).toLocaleDateString()
+    }));
+    exportToCSV(exportData, 'boms_export.csv');
+  };
 
   const addComponent = () => setForm({ ...form, components: [...form.components, { component_name: '', quantity: '', unit: 'pcs' }] });
   const addOperation = () => setForm({ ...form, operations: [...form.operations, { name: '', duration_mins: '', work_center: '' }] });
@@ -85,6 +99,12 @@ export default function BOMPage() {
           <p className="text-sm text-gainsboro-400 mt-1">{bomsMeta?.total || boms.length} BoMs total</p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-3.5 py-2 bg-navy-800 hover:bg-navy-700 text-gainsboro-200 text-sm font-medium rounded-lg border border-navy-600 transition-colors"
+          >
+            <Download size={15} /> Export CSV
+          </button>
           {/* Column Filters */}
           <div className="flex items-center gap-2">
             <Filter size={14} className="text-gainsboro-500" />
@@ -124,8 +144,8 @@ export default function BOMPage() {
         <div className="space-y-3">
           {boms.map((bom) => {
             const isExpanded = expandedBom === bom.id;
-            const components = bom.components ? (Array.isArray(bom.components) ? bom.components : []) : [];
-            const operations = bom.operations ? (Array.isArray(bom.operations) ? bom.operations : []) : [];
+            const components = bom.components ? (Array.isArray(bom.components) ? bom.components : JSON.parse(bom.components || '[]')) : [];
+            const operations = bom.operations ? (Array.isArray(bom.operations) ? bom.operations : JSON.parse(bom.operations || '[]')) : [];
 
             return (
               <div key={bom.id} className="glass-card overflow-hidden">
@@ -144,32 +164,7 @@ export default function BOMPage() {
 
                 {isExpanded && (
                   <div className="px-4 pb-4 border-t border-navy-600 pt-4 animate-fade-in">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="text-xs font-semibold text-gainsboro-400 uppercase mb-2">Components</h4>
-                        <div className="space-y-1.5">
-                          {components.map((c, i) => (
-                            <div key={i} className="flex items-center justify-between bg-navy-700/50 rounded-lg px-3 py-2">
-                              <span className="text-sm text-gainsboro-200">{c.component_name}</span>
-                              <span className="text-xs text-gainsboro-400">{c.quantity} {c.unit}</span>
-                            </div>
-                          ))}
-                          {components.length === 0 && <p className="text-xs text-gainsboro-500">No components</p>}
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-gainsboro-400 uppercase mb-2">Operations</h4>
-                        <div className="space-y-1.5">
-                          {operations.map((o, i) => (
-                            <div key={i} className="flex items-center justify-between bg-navy-700/50 rounded-lg px-3 py-2">
-                              <span className="text-sm text-gainsboro-200">{o.name}</span>
-                              <span className="text-xs text-gainsboro-400">{o.duration_mins} mins · {o.work_center}</span>
-                            </div>
-                          ))}
-                          {operations.length === 0 && <p className="text-xs text-gainsboro-500">No operations</p>}
-                        </div>
-                      </div>
-                    </div>
+                    <BOMTree components={components} operations={operations} />
                   </div>
                 )}
               </div>

@@ -7,16 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        /* Light Theme Backgrounds (replaces navy) */
+        /* Clean Light Theme Backgrounds */
         navy: {
-          950: '#F3F4F6',
-          900: '#FAFAFA',
+          950: '#F8FAFC',
+          900: '#FFFFFF',
           800: '#FFFFFF',
-          700: '#F3F4F6',
-          600: '#E5E7EB',
-          500: '#D1D5DB',
+          700: '#F1F5F9',
+          600: '#E2E8F0',
+          500: '#CBD5E1',
         },
-        /* Raw Sienna (Primary) */
+        /* Raw Sienna (Primary Accent) */
         sienna: {
           50:  '#FFF8F0',
           100: '#FFECD4',
@@ -29,7 +29,7 @@ export default {
           800: '#683615',
           900: '#48240E',
         },
-        /* Xanadu (Accent) */
+        /* Xanadu (Secondary Accent) */
         xanadu: {
           50:  '#F2F5F3',
           100: '#E0E8E3',
@@ -42,18 +42,19 @@ export default {
           800: '#3B453D',
           900: '#2D352F',
         },
-        /* Dark Grays for Text (replaces gainsboro) */
+        /* Ultra High Contrast Dark Text for Light Theme */
         gainsboro: {
-          50:  '#000000',
-          100: '#111827',
-          200: '#1F2937',
-          300: '#374151',
-          400: '#4B5563',
-          500: '#6B7280',
-          600: '#9CA3AF',
-          700: '#D1D5DB',
-          800: '#E5E7EB',
-          900: '#F3F4F6',
+          50:  '#0F172A',
+          100: '#0F172A',
+          200: '#1E293B',
+          300: '#334155',
+          400: '#475569',
+          500: '#64748B',
+          600: '#94A3B8',
+          700: '#CBD5E1',
+          800: '#E2E8F0',
+          900: '#F1F5F9',
+          950: '#F8FAFC',
         },
       },
       /* Override Tailwind's default indigo → Raw Sienna */

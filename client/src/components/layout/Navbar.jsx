@@ -40,9 +40,13 @@ export default function Navbar() {
   };
 
   return (
-    <header className="h-16 bg-navy-900 border-b border-navy-600 flex items-center justify-between px-6 sticky top-0 z-30">
+    <header className="h-16 bg-navy-800/90 backdrop-blur-md border-b border-navy-600 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs">
       <div className="flex items-center gap-4">
-        <h2 className="text-sm text-gainsboro-400 font-medium">Engineering Change Control</h2>
+        <h2 className="text-sm text-gainsboro-300 font-semibold tracking-tight">Engineering Change Control</h2>
+        <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 live-pulse" />
+          Real-Time Syncing
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
@@ -51,7 +55,7 @@ export default function Navbar() {
 
         {/* Role badge */}
         {user && (
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${roleColors[user.role]}`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-bold border border-current/20 ${roleColors[user.role]}`}>
             {roleLabels[user.role]}
           </span>
         )}

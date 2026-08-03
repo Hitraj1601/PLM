@@ -10,6 +10,8 @@ import useEcoStore from '../store/ecoStore';
 import useAuthStore from '../store/authStore';
 import useECO from '../hooks/useECO';
 
+import SkeletonLoader from '../components/ui/SkeletonLoader';
+
 export default function DashboardPage() {
   const { stats, recentEcos, fetchDashboardStats, fetchRecentEcos } = useEcoStore();
   const { user } = useAuthStore();
@@ -52,12 +54,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Open ECOs" value={stats?.openEcos ?? '—'} icon={GitPullRequest} onClick={() => navigate('/eco')} />
-        <StatCard title="Pending Approvals" value={stats?.pendingApprovals ?? '—'} icon={Clock} onClick={() => navigate('/eco')} />
-        <StatCard title="Active Products" value={stats?.activeProducts ?? '—'} icon={Package} onClick={() => navigate('/products')} />
-        <StatCard title="Active BoMs" value={stats?.activeBoms ?? '—'} icon={Layers} onClick={() => navigate('/bom')} />
-      </div>
+      {!stats ? (
+        <SkeletonLoader count={4} type="card" />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard title="Open ECOs" value={stats?.openEcos ?? '—'} icon={GitPullRequest} trend="up" trendValue="+12% active" onClick={() => navigate('/eco')} />
+          <StatCard title="Pending Approvals" value={stats?.pendingApprovals ?? '—'} icon={Clock} trend="down" trendValue="-3 pending" onClick={() => navigate('/eco')} />
+          <StatCard title="Active Products" value={stats?.activeProducts ?? '—'} icon={Package} trend="up" trendValue="Ready for mfg" onClick={() => navigate('/products')} />
+          <StatCard title="Active BoMs" value={stats?.activeBoms ?? '—'} icon={Layers} trend="up" trendValue="Verified" onClick={() => navigate('/bom')} />
+        </div>
+      )}
 
       {/* Recent ECOs */}
       <div>

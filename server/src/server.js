@@ -42,6 +42,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+app.set('io', io);
 const PORT = process.env.PORT || 5000;
 
 // Global Middleware configuration

@@ -22,26 +22,8 @@ export default function ECODetailPanel({ eco, onClose, onApprove, onReject, onNe
       setLoadingFull(false);
     }
   };
-  const { user } = useAuthStore();
-  if (!eco) return null;
-
-  const isApprover = user?.role === 'approver' || user?.role === 'admin';
-  const isEngineering = user?.role === 'engineering' || user?.role === 'admin';
-  const isApprovalStage = eco.requires_approval;
-  const isDone = eco.status === 'applied';
-  const isRejected = eco.status === 'rejected';
-  const isActionable = !isDone && !isRejected;
-
-  const wrapAction = async (actionFn) => {
-    setConflictError(false);
-    try {
-      await actionFn();
-    } catch (err) {
-      if (err.response?.status === 409) {
-        setConflictError(true);
-      }
-    }
-  };
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -136,7 +118,7 @@ export default function ECODetailPanel({ eco, onClose, onApprove, onReject, onNe
                       {loading ? 'Processing...' : 'Approve'}
                     </button>
                     <button
-                      onClick={() => wrapAction(() => onReject?.(eco.id, eco.updated_at))}
+                      onClick={() => setShowRejectModal(true)}
                       disabled={loading}
                       className="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
                     >
@@ -161,8 +143,50 @@ export default function ECODetailPanel({ eco, onClose, onApprove, onReject, onNe
             <section>
               <div className="glass-card p-4 border-red-500/30">
                 <p className="text-sm text-red-400 font-semibold">This ECO has been rejected.</p>
+                {eco.rejection_reason && (
+                  <p className="text-xs text-gainsboro-300 mt-2 bg-navy-950 p-2.5 rounded border border-navy-700">
+                    <span className="font-semibold text-red-300">Reason: </span>
+                    {eco.rejection_reason}
+                  </p>
+                )}
               </div>
             </section>
+          )}
+
+          {/* Rejection Modal */}
+          {showRejectModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+              <div className="bg-navy-900 border border-navy-600 rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl animate-fade-in">
+                <h3 className="text-lg font-bold text-gainsboro-100">Reject Change Order</h3>
+                <p className="text-xs text-gainsboro-400">Please provide a clear reason for rejecting this ECO.</p>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Enter rejection reason or feedback..."
+                  rows={4}
+                  className="w-full bg-navy-800 border border-navy-600 rounded-lg p-3 text-sm text-gainsboro-200 placeholder-gainsboro-500 outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    onClick={() => { setShowRejectModal(false); setRejectReason(''); }}
+                    className="px-4 py-2 text-sm text-gainsboro-400 hover:text-gainsboro-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setShowRejectModal(false);
+                      await wrapAction(() => onReject?.(eco.id, rejectReason, eco.updated_at));
+                      setRejectReason('');
+                    }}
+                    disabled={loading}
+                    className="px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Confirm Rejection
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Section 5: Audit Timeline */}
