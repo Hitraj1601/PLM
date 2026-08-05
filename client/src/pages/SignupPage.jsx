@@ -36,10 +36,12 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sienna-500 to-xanadu-400 flex items-center justify-center mx-auto mb-4">
-            <GitPullRequest size={32} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gradient">PLM System</h1>
+          <Link to="/landing" className="inline-block hover:opacity-90 transition-opacity">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sienna-500 to-xanadu-400 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sienna-500/20">
+              <GitPullRequest size={32} className="text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gradient">PLM System</h1>
+          </Link>
           <p className="text-gainsboro-400 mt-2">Create your account</p>
         </div>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, LayoutGrid, List, Search, Filter } from 'lucide-react';
 import useECO from '../hooks/useECO';
 import useEcoStore from '../store/ecoStore';
@@ -21,7 +21,7 @@ export default function ECOPage() {
 
   const canCreate = user?.role === 'engineering' || user?.role === 'admin';
 
-  useState(() => { fetchStages(); }, []);
+  useEffect(() => { fetchStages(); }, []);
 
   const handleAction = async (fn, id, lastKnownUpdatedAt) => {
     setActionLoading(true);
@@ -71,11 +71,35 @@ export default function ECOPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gainsboro-100">Change Orders</h1>
           <p className="text-sm text-gainsboro-400 mt-1">{ecosMeta?.total || ecos.length} ECOs total</p>
         </div>
+
+        {/* Quick Filter Tabs */}
+        <div className="flex items-center gap-2 bg-navy-900 p-1.5 rounded-xl border border-navy-600">
+          <button
+            onClick={() => { setFilters({ ...filters, stage: '' }); setPage(1); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              !filters.stage ? 'bg-sienna-600 text-white shadow-xs' : 'text-gainsboro-400 hover:text-gainsboro-200'
+            }`}
+          >
+            All ECOs ({ecos.length})
+          </button>
+          <button
+            onClick={() => { setFilters({ ...filters, stage: 'Approval' }); setPage(1); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+              filters.stage === 'Approval'
+                ? 'bg-amber-500 text-navy-950 font-bold shadow-xs'
+                : 'text-amber-400 hover:bg-amber-500/10'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 live-pulse" />
+            Pending Approval ({ecos.filter(e => e.stage_name === 'Approval' || e.stage_name === 'In Review' || e.status === 'pending').length})
+          </button>
+        </div>
+
         <div className="flex items-center gap-3">
           {/* Column Filters */}
           <div className="flex items-center gap-2">

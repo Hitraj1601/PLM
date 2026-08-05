@@ -5,9 +5,11 @@ import {
   ChevronDown, ChevronUp, DollarSign, Activity, FileText, ArrowRight, CheckCircle2 
 } from 'lucide-react';
 import heroMockup from '../assets/hero_mockup.png';
+import useAuthStore from '../store/authStore';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
 
   // Workflow Simulator State
   const [simStage, setSimStage] = useState(1); // 0: Draft, 1: In Review, 2: Pending Approval, 3: Applied
@@ -80,18 +82,29 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/login')}
-              className="px-4 py-2 text-sm font-bold text-slate-700 hover:text-slate-900 transition-colors"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => navigate('/signup')}
-              className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-sienna-600 to-sienna-500 hover:from-sienna-500 hover:to-sienna-400 rounded-xl shadow-md shadow-sienna-600/20 transition-all hover:scale-[1.02]"
-            >
-              Get Started Free →
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={() => navigate('/')}
+                className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-sienna-600 to-sienna-500 hover:from-sienna-500 hover:to-sienna-400 rounded-xl shadow-md shadow-sienna-600/20 transition-all hover:scale-[1.02]"
+              >
+                Go to Dashboard →
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-4 py-2 text-sm font-bold text-slate-700 hover:text-slate-900 transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-sienna-600 to-sienna-500 hover:from-sienna-500 hover:to-sienna-400 rounded-xl shadow-md shadow-sienna-600/20 transition-all hover:scale-[1.02]"
+                >
+                  Get Started Free →
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -114,18 +127,29 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-          <button
-            onClick={() => navigate('/signup')}
-            className="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-sienna-600 hover:bg-sienna-500 rounded-xl shadow-xl shadow-sienna-600/25 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
-          >
-            Start Free Trial <ArrowRight size={18} />
-          </button>
-          <button
-            onClick={() => navigate('/login')}
-            className="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl shadow-sm transition-all hover:border-slate-400 flex items-center justify-center gap-2"
-          >
-            Explore Live Demo
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={() => navigate('/')}
+              className="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-sienna-600 hover:bg-sienna-500 rounded-xl shadow-xl shadow-sienna-600/25 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+            >
+              Go to Dashboard <ArrowRight size={18} />
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/signup')}
+                className="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-sienna-600 hover:bg-sienna-500 rounded-xl shadow-xl shadow-sienna-600/25 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+              >
+                Start Free Trial <ArrowRight size={18} />
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="w-full sm:w-auto px-8 py-4 text-base font-bold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl shadow-sm transition-all hover:border-slate-400 flex items-center justify-center gap-2"
+              >
+                Explore Live Demo
+              </button>
+            </>
+          )}
         </div>
 
         {/* Hero Mockup Frame */}

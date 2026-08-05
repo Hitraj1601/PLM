@@ -24,6 +24,16 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// Custom component to restrict auth pages (login/signup) to unauthenticated users only
+function PublicOnlyRoute({ children }) {
+  const { isAuthenticated } = useAuthStore();
+  
+  // If the user is already authenticated, redirect them to the app root
+  if (isAuthenticated) return <Navigate to="/" replace />;
+  
+  return children;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,15 +50,15 @@ export default function App() {
         <Routes>
           {/* Public Landing & Auth routes */}
           <Route path="/landing" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+          <Route path="/signup" element={<PublicOnlyRoute><SignupPage /></PublicOnlyRoute>} />
           
           {/* Protected route group: everything under "/" requires authentication to access */}
           <Route
             path="/"
             element={
               <ProtectedRoute>
-                {/* Layout component wraps all authenticated pages (likely contains navbar/sidebar) */}
+                {/* Layout component wraps all authenticated pages */}
                 <Layout />
               </ProtectedRoute>
             }

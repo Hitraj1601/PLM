@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Layers, ChevronDown, ChevronUp, X, Search, Filter, Download } from 'lucide-react';
+import { Plus, Layers, ChevronDown, ChevronUp, X, Search, Filter, Download, Columns } from 'lucide-react';
 import useBOM from '../hooks/useBOM';
 import useEcoStore from '../store/ecoStore';
 import useAuthStore from '../store/authStore';
@@ -9,6 +9,7 @@ import Modal from '../components/ui/Modal';
 import EmptyState from '../components/ui/EmptyState';
 import Pagination from '../components/ui/Pagination';
 import BOMTree from '../components/bom/BOMTree';
+import BOMCompareModal from '../components/bom/BOMCompareModal';
 import { exportToCSV } from '../utils/exportCsv';
 
 export default function BOMPage() {
@@ -21,6 +22,7 @@ export default function BOMPage() {
     fetchProducts();
   }, [fetchProducts]);
   const [showModal, setShowModal] = useState(false);
+  const [showCompareModal, setShowCompareModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ product_id: '', name: '', version: 'v1', components: [{ component_name: '', quantity: '', unit: 'pcs' }], operations: [{ name: '', duration_mins: '', work_center: '' }] });
 
@@ -99,6 +101,12 @@ export default function BOMPage() {
           <p className="text-sm text-gainsboro-400 mt-1">{bomsMeta?.total || boms.length} BoMs total</p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowCompareModal(true)}
+            className="flex items-center gap-2 px-3.5 py-2 bg-navy-800 hover:bg-navy-700 text-sienna-400 hover:text-sienna-300 text-sm font-medium rounded-lg border border-navy-600 transition-colors shadow-xs"
+          >
+            <Columns size={15} /> Compare Revisions
+          </button>
           <button
             onClick={handleExportCSV}
             className="flex items-center gap-2 px-3.5 py-2 bg-navy-800 hover:bg-navy-700 text-gainsboro-200 text-sm font-medium rounded-lg border border-navy-600 transition-colors"
@@ -236,6 +244,12 @@ export default function BOMPage() {
           </div>
         </form>
       </Modal>
+
+      <BOMCompareModal
+        isOpen={showCompareModal}
+        onClose={() => setShowCompareModal(false)}
+        boms={boms}
+      />
     </div>
   );
 }

@@ -140,3 +140,180 @@ export function computeProductDiff(product, changes) {
 
   return { before, after };
 }
+
+export function compareTwoBOMs(baseBOM, targetBOM) {
+  const parseList = (raw) => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const baseComps = parseList(baseBOM?.components);
+  const targetComps = parseList(targetBOM?.components);
+
+  const baseOps = parseList(baseBOM?.operations);
+  const targetOps = parseList(targetBOM?.operations);
+
+  const compDiff = [];
+  const baseCompMap = new Map();
+  baseComps.forEach((comp) => {
+    const name = comp.component_name || comp.name || '';
+    if (name) baseCompMap.set(name, comp);
+  });
+
+  const targetCompMap = new Map();
+  targetComps.forEach((comp) => {
+    const name = comp.component_name || comp.name || '';
+    if (name) targetCompMap.set(name, comp);
+  });
+
+  let addedCount = 0;
+  let removedCount = 0;
+  let modifiedCount = 0;
+  let unchangedCount = 0;
+  let partsDelta = 0;
+
+  baseCompMap.forEach((baseComp, name) => {
+    const targetComp = targetCompMap.get(name);
+    const oldQty = parseFloat(baseComp.quantity) || 0;
+    const unit = baseComp.unit || targetComp?.unit || 'pcs';
+
+    if (!targetComp) {
+      compDiff.push({
+        component: name,
+        oldQty,
+        newQty: null,
+        unit,
+        type: 'removed',
+        delta: -oldQty,
+      });
+      removedCount++;
+      partsDelta -= oldQty;
+    } else {
+      const newQty = parseFloat(targetComp.quantity) || 0;
+      const delta = newQty - oldQty;
+
+      if (delta === 0 && baseComp.unit === targetComp.unit) {
+        compDiff.push({
+          component: name,
+          oldQty,
+          newQty,
+          unit,
+          type: 'unchanged',
+          delta: 0,
+        });
+        unchangedCount++;
+      } else {
+        compDiff.push({
+          component: name,
+          oldQty,
+          newQty,
+          unit,
+          type: 'modified',
+          delta,
+        });
+        modifiedCount++;
+        partsDelta += delta;
+      }
+    }
+  });
+
+  targetCompMap.forEach((targetComp, name) => {
+    if (!baseCompMap.has(name)) {
+      const newQty = parseFloat(targetComp.quantity) || 0;
+      const unit = targetComp.unit || 'pcs';
+      compDiff.push({
+        component: name,
+        oldQty: null,
+        newQty,
+        unit,
+        type: 'added',
+        delta: newQty,
+      });
+      addedCount++;
+      partsDelta += newQty;
+    }
+  });
+
+  const opDiff = [];
+  const baseOpMap = new Map();
+  baseOps.forEach((op) => {
+    if (op.name) baseOpMap.set(op.name, op);
+  });
+
+  const targetOpMap = new Map();
+  targetOps.forEach((op) => {
+    if (op.name) targetOpMap.set(op.name, op);
+  });
+
+  baseOpMap.forEach((baseOp, name) => {
+    const targetOp = targetOpMap.get(name);
+    const oldDur = parseInt(baseOp.duration_mins || 0);
+    const oldWc = baseOp.work_center || '';
+
+    if (!targetOp) {
+      opDiff.push({
+        name,
+        oldDuration: oldDur,
+        newDuration: null,
+        oldWorkCenter: oldWc,
+        newWorkCenter: '',
+        type: 'removed',
+      });
+    } else {
+      const newDur = parseInt(targetOp.duration_mins || 0);
+      const newWc = targetOp.work_center || '';
+
+      if (oldDur === newDur && oldWc === newWc) {
+        opDiff.push({
+          name,
+          oldDuration: oldDur,
+          newDuration: newDur,
+          oldWorkCenter: oldWc,
+          newWorkCenter: newWc,
+          type: 'unchanged',
+        });
+      } else {
+        opDiff.push({
+          name,
+          oldDuration: oldDur,
+          newDuration: newDur,
+          oldWorkCenter: oldWc,
+          newWorkCenter: newWc,
+          type: 'modified',
+        });
+      }
+    }
+  });
+
+  targetOpMap.forEach((targetOp, name) => {
+    if (!baseOpMap.has(name)) {
+      opDiff.push({
+        name,
+        oldDuration: null,
+        newDuration: parseInt(targetOp.duration_mins || 0),
+        oldWorkCenter: '',
+        newWorkCenter: targetOp.work_center || '',
+        type: 'added',
+      });
+    }
+  });
+
+  return {
+    componentDiff: compDiff,
+    operationDiff: opDiff,
+    summary: {
+      addedCount,
+      removedCount,
+      modifiedCount,
+      unchangedCount,
+      totalChanges: addedCount + removedCount + modifiedCount,
+      partsDelta,
+    },
+  };
+}
+
