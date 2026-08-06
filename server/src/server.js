@@ -32,7 +32,18 @@ const app = express();
 const server = http.createServer(app);
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
 if (process.env.CLIENT_URL) {
-  allowedOrigins.push(process.env.CLIENT_URL);
+  const clientOrigins = process.env.CLIENT_URL.split(',')
+    .map(url => url.trim())
+    .filter(Boolean)
+    .flatMap(url => {
+      try {
+        const origin = new URL(url).origin;
+        return [url, origin];
+      } catch (e) {
+        return [url];
+      }
+    });
+  allowedOrigins.push(...new Set(clientOrigins));
 }
 
 // Initialize Socket.io on the HTTP server with CORS allowance
